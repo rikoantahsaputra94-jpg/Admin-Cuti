@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>DASBOARD ADMIN CUTI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+/* ================= GLOBAL ================= */
+body{
+  font-family:"Segoe UI",Arial,sans-serif;
+  background:#f4f6fb;
+  margin:0;
+}
+
+/* ================= HEADER ================= */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#0d3b66;
+  color:#fff;
+  padding:12px 24px;
+  font-weight:600;
+}
+
+header h2{
+  margin:0;
+  font-size:18px;
+  letter-spacing:.5px;
+}
+
+header a{
+  background:#fff;
+  color:#0d3b66;
+  padding:6px 12px;
+  border-radius:6px;
+  text-decoration:none;
+  font-size:14px;
+  font-weight:600;
+}
+
+/* ================= MAIN LAYOUT ================= */
+main{
+  display:flex;
+  gap:20px;
+  padding:20px;
+  height:calc(100vh - 60px);
+  box-sizing:border-box;
+}
+
+/* ================= PANEL KIRI ================= */
+.sidebar{
+  width:360px;
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 4px 16px rgba(0,0,0,.06);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.sidebar h3{
+  margin:0;
+  padding:16px;
+  background:#eef3ff;
+  font-size:16px;
+  border-bottom:1px solid #e0e6ff;
+}
+
+.table-container{
+  overflow:auto;
+  flex:1;
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+
+.table th{
+  position:sticky;
+  top:0;
+  background:#0d6efd;
+  color:#fff;
+  padding:8px;
+  font-size:13px;
+}
+
+.table td{
+  padding:8px;
+  border-bottom:1px solid #f0f0f0;
+  cursor:pointer;
+}
+
+.table tr:hover{
+  background:#f5f8ff;
+}
+
+/* ================= PANEL KANAN ================= */
+.detail{
+  flex:1;
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
+  padding:24px;
+  overflow:auto;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px 32px;
+}
+
+.label{
+  font-weight:600;
+  font-size:13px;
+  margin-bottom:4px;
+  color:#555;
+}
+
+input,select{
+  width:100%;
+  padding:10px;
+  border:1px solid #ddd;
+  border-radius:6px;
+  font-size:14px;
+}
+
+input:focus,select:focus{
+  outline:none;
+  border-color:#0d6efd;
+}
+
+/* ================= BUTTON ================= */
+.actions{
+  margin-top:24px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  padding:10px 18px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:14px;
+  color:#fff;
+}
+
+.btn-save{background:#198754}
+.btn-doc{background:#6f42c1}
+.btn-del{background:#dc3545}
+.btn-nav{background:#0d6efd}
+
+/* ================= STATUS ================= */
+.status-badge{
+  padding:4px 8px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:600;
+}
+
+.status-diajukan{background:#e7f1ff;color:#0d6efd}
+.status-proses{background:#fff4e5;color:#d97706}
+.status-selesai{background:#e6f9f0;color:#198754}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:900px){
+  main{
+    flex-direction:column;
+    height:auto;
+  }
+  .sidebar{
+    width:100%;
+    height:350px;
+  }
+}
+  /* ===== TAB UI (TAMBAHAN) ===== */
+.tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:16px;
+}
+
+.tab-btn{
+  padding:8px 16px;
+  border-radius:8px;
+  border:1px solid #d0d7ff;
+  background:#f4f6ff;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.tab-btn.active{
+  background:#0d6efd;
+  color:#fff;
+  border-color:#0d6efd;
+}
+
+.tab-content{
+  display:none;
+}
+
+.tab-content.active{
+  display:block;
+}
+</style>
+</head>
+
+<body>
+
+<header style="display:flex;justify-content:space-between;align-items:center;background:#0d3b66;color:#fff;padding:12px 24px;font-weight:600;">
+
+  <!-- KIRI : KEMBALI -->
+  <a href="https://rikoantahsaputra-crypto.github.io/Menu-Kep-RSDS/"
+     style="background:#fff;color:#0d3b66;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;">
+    ⬅ Kembali
+  </a>
+
+  <!-- JUDUL -->
+  <h2 style="margin:0;font-size:18px;letter-spacing:.5px;">
+    DASBOARD ADMIN CUTI
+  </h2>
+
+  <!-- KANAN : RIWAYAT CUTI -->
+  <a href="https://rikocagat.github.io/Tampilan-Cuti-Lama/"
+     target="_blank"
+     style="background:#ffc107;color:#000;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:700;">
+    📜 Riwayat Cuti 2025
+  </a>
+
+</header>
+
+<main>
+
+<!-- PANEL KIRI (TETAP, TIDAK DIUBAH LOGIC) -->
+<div class="sidebar">
+  <h3>📋 Data Pengajuan</h3>
+
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PANEL KANAN (DITAMBAH TAB, LOGIC AMAN) -->
+<div class="detail">
+
+  <!-- TAB HEADER -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="openTab('tabDetail', this)">
+      🧾 Detail Pengajuan
+    </button>
+    <button class="tab-btn" onclick="openTab('tabTabel', this)">
+      📋 Tabel Pengajuan
+    </button>
+  </div>
+
+  <!-- TAB DETAIL -->
+  <div id="tabDetail" class="tab-content active">
+    <div id="card"></div>
+  </div>
+
+  <!-- TAB TABEL -->
+  <div id="tabTabel" class="tab-content">
+    <div style="overflow-x:auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>NIP</th>
+            <th>Jenis Cuti</th>
+            <th>Awal</th>
+            <th>Akhir</th>
+            <th>Lama</th>
+            <th>Nomor Surat</th>
+            <th>Sisa Cuti</th>
+            <th>Status</th>
+            <th>Dokumen</th>
+          </tr>
+        </thead>
+        <tbody id="tableBodyFull"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</main>
+<script>
+/* ================= CONFIG ================= */
+const SUPABASE_URL = "https://ufiqibxdgwlysqhinqbz.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_EVSVWnsUriOPA_O3RnGTpg_Zmd4pyAL";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyjE3UkCsNGW9iFNRUdJvVaZD8LVj3V4tcLpDwYwXqQ9mTN9jveTu5mrOq_UXaQ4T6i/exec";
+
+/* ================= SUPABASE CLIENT ================= */
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+/* ================= GLOBAL STATE (WAJIB ADA) ================= */
+
+// ambil element card (WAJIB supaya render() tidak error)
+const card = document.getElementById("card");
+
+// data utama
+let dataList = [];        // dari pengajuan_cuti
+let dataManual = [];      // dari cuti_view_manual
+
+// histori gabungan (VIEW + TABLE + MANUAL, sisa_cuti > 0)
+let dataGabungan = [];
+
+// index data aktif (untuk next / prev)
+let index = 0;
+
+// dokumen terakhir
+let lastDocUrl = "";
+let lastDocName = "";
+/* ================= HITUNG AKHIR CUTI ================= */
+function hitungAkhir(tglMulai,lama,cb){
+  let t=new Date(tglMulai),h=0;
+  while(h<lama){
+    let d=t.getDay();
+    if(d!==0&&d!==6)h++;
+    if(h<lama)t.setDate(t.getDate()+1);
+  }
+  let add=parseInt(cb||0);
+  while(add>0){
+    t.setDate(t.getDate()+1);
+    let d=t.getDay();
+    if(d!==0&&d!==6)add--;
+  }
+  return t.toISOString().split("T")[0];
+}
+function getLatestSisaCutiGlobal(nip, currentId){
+  if (!nip || !Array.isArray(dataGabungan)) return 0;
+
+  const histori = dataGabungan
+    .filter(d =>
+      d.nip === nip &&
+      String(d.jenis_cuti).toUpperCase().includes("TAHUNAN") &&
+      d.sisa_cuti !== null &&
+      d.sisa_cuti !== "" &&
+      !isNaN(Number(d.sisa_cuti))
+    )
+    .sort((a, b) => {
+      const ta = new Date(a.created_at || a.tgl_mulai || 0).getTime();
+      const tb = new Date(b.created_at || b.tgl_mulai || 0).getTime();
+      return tb - ta;
+    });
+
+  if (histori.length === 0) return 12;
+
+  return Number(histori[0].sisa_cuti);
+}
+function refreshSisaCuti(){
+  const d = dataList[index];
+  if (!d) return alert("Data tidak ditemukan");
+
+  if (!String(d.jenis_cuti).toUpperCase().includes("TAHUNAN")) {
+    alert("Sisa cuti hanya berlaku untuk cuti tahunan");
+    return;
+  }
+
+  const lama = Number(document.getElementById("lama_cuti")?.value || 0);
+  const sisaTerakhir = getLatestSisaCutiGlobal(d.nip, d.id);
+
+  let hasil = sisaTerakhir - lama;
+  if (hasil < 0) hasil = 0;
+
+  document.getElementById("sisa_cuti").value = hasil;
+  d.sisa_cuti = hasil; // 🔥 penting
+
+  console.log("DEBUG SISA CUTI:", {
+    nip: d.nip,
+    sisaTerakhir,
+    lama,
+    hasil
+  });
+}
+/* ================= HITUNG SISA CUTI TAHUNAN ================= */
+function hitungSisaCutiTahunan(nip, currentId, lamaCuti){
+  const sisaTerakhir = getLatestSisaCutiGlobal(nip, currentId);
+
+  const lama = Number(lamaCuti || 0);
+  const hasil = Number(sisaTerakhir) - lama;
+
+  return hasil >= 0 ? hasil : 0;
+}
+async function loadAll(){
+
+  // 1️⃣ LOAD pengajuan_cuti
+  const { data: pengajuanData, error: errorPengajuan } =
+  await supabaseClient
+    .from("pengajuan_cuti")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if(errorPengajuan){
+    console.error("Gagal load pengajuan_cuti:", errorPengajuan);
+  }
+
+  dataList = pengajuanData || [];
+
+  // 2️⃣ LOAD view_pengajuan
+  const { data: viewDataRaw, error: errorView } =
+  await supabaseClient
+    .from("view_pengajuan")
+    .select("*");
+
+  if(errorView){
+    console.error("Gagal load view_pengajuan:", errorView);
+  }
+
+  const viewData = viewDataRaw || [];
+
+  // 3️⃣ LOAD cuti_view_manual
+  const { data: manualDataRaw, error: errManual } =
+  await supabaseClient
+    .from("cuti_view_manual")
+    .select("*");
+
+  if(errManual){
+    console.error("Gagal load cuti_view_manual:", errManual);
+  }
+
+  const manualData = manualDataRaw || [];
+
+  // =============================
+  // 🔥 GABUNGKAN DATA
+  // =============================
+  dataGabungan = [];
+
+  [...viewData, ...dataList, ...manualData].forEach(d => {
+    if(
+      String(d.jenis_cuti || "").toUpperCase().includes("TAHUNAN") &&
+      Number(d.sisa_cuti) > 0
+    ){
+      dataGabungan.push({
+        nip: d.nip,
+        jenis_cuti: d.jenis_cuti,
+        sisa_cuti: Number(d.sisa_cuti),
+        created_at: d.created_at || d.tgl_mulai
+      });
+    }
+  });
+
+// =============================
+// 🔥 INI KUNCINYA
+// =============================
+index = 0;
+render();
+
+tableData = dataList;
+renderTable(tableData);
+renderTableFull(tableData); // 🔥 tabel kanan terisi
+} // 🔥🔥🔥 PENUTUP loadAll() WAJIB ADA
+
+/* ================= RENDER ================= */
+function render(){
+  const d = dataList[index];
+  if(!d){
+    card.innerHTML = "<b>Tidak ada data</b>";
+    return;
+  }
+
+  const akhir = d.tgl_selesai || hitungAkhir(
+    d.tgl_mulai,
+    d.lama_cuti,
+    d.cuti_bersama
+  );
+
+  card.innerHTML = `
+  <div class="grid">
+    <!-- KIRI -->
+    <div>
+      <div class="label">Nama</div>
+      <input id="nama" value="${d.nama}">
+    </div>
+    <div>
+      <div class="label">Nomor Surat</div>
+      <input id="nomor_surat" value="${d.nomor_surat||""}">
+    </div>
+
+    <div>
+      <div class="label">NIP</div>
+      <input id="nip" value="${d.nip}">
+    </div>
+    <div>
+      <div class="label">Awal Cuti</div>
+      <input id="tgl_mulai" type="date" value="${d.tgl_mulai}">
+    </div>
+
+    <div>
+      <div class="label">Jabatan</div>
+      <input id="jabatan" value="${d.jabatan||""}">
+    </div>
+    <div>
+      <div class="label">Akhir Cuti</div>
+      <input id="akhir" value="${akhir}">
+    </div>
+
+<div>
+  <div class="label">Jenis Cuti</div>
+  <input id="jenis_cuti" value="${d.jenis_cuti}">
+</div>
+
+<div>
+  <div class="label">Lama Cuti</div>
+  <input id="lama_cuti" type="number" value="${d.lama_cuti}">
+</div>
+
+<div>
+  <div class="label">Alamat</div>
+  <input id="alamat" value="${d.alamat||""}">
+</div>
+
+<div>
+  <div class="label">Sisa Cuti</div>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <input
+  id="sisa_cuti"
+  value="${getLatestSisaCutiGlobal(d.nip, d.id)}"
+>
+    <button
+      type="button"
+      onclick="refreshSisaCuti()"
+      style="
+        padding:0 14px;
+        height:42px;
+        border:none;
+        border-radius:6px;
+        background:#0d6efd;
+        color:#fff;
+        cursor:pointer;
+        flex-shrink:0;
+      ">
+      🔄
+    </button>
+  </div>
+</div>
+
+<div>
+  <div class="label">No HP</div>
+  <input id="no_hp" value="${d.no_hp||""}">
+</div>
+
+<div>
+  <div class="label">Cuti Bersama</div>
+  <input id="cb" type="number" value="${d.cuti_bersama||0}">
+</div>
+
+<div>
+  <div class="label">Status</div>
+  <select id="status">
+    <option ${d.status==="DIAJUKAN" ? "selected" : ""}>DIAJUKAN</option>
+    <option ${d.status==="Sudah Upload Eaktivity,Sementara" ? "selected" : ""}>Sudah Upload Eaktivity,Sementara</option>
+    <option ${d.status==="Proses Akan di lakukan Bulan Berikutnya" ? "selected" : ""}>Proses Akan di lakukan Bulan Berikutnya</option>
+    <option ${d.status==="TIDAK LENGKAP" ? "selected" : ""}>KIRIM ULANG, DAFTAR PENGAJUAN TTD SAMPAI KABID/KABAG</option>
+    <option ${d.status==="PERSARATAN" ? "selected" : ""}>UPLOAD ULANG, LEMBAR PENGAJUAN HARUS TTD SAMPAI KABID/KABAG</option>
+    <option ${d.status?.startsWith("SUDAH JADI") ? "selected" : ""}>
+      SUDAH JADI, DI RIWAYAT, UPLOAD MELALUI ADMIN BIDANG
+    </option>
+  </select>
+</div>
+  <div class="files">
+    <div class="label">Berkas & Tanda Tangan</div>
+    <div class="files-grid">
+      <div>${d.file_1_url ? `<a href="${d.file_1_url}" target="_blank">Persyaratan 1</a>` : "-"}</div>
+      <div>${d.file_2_url ? `<a href="${d.file_2_url}" target="_blank">Persyaratan 2</a>` : "-"}</div>
+      <div>${d.signature_url ? `<a href="${d.signature_url}" target="_blank">TTD</a>` : "-"}</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn btn-save" onclick="simpan(this)">Simpan</button>
+
+<button type="button" class="btn btn-doc" onclick="buatDokumen(1)">
+  Buat Dokumen V1
+</button>
+
+<button type="button" class="btn btn-doc" onclick="buatDokumen(2)">
+  Buat Dokumen V2
+</button>
+
+<button type="button" class="btn btn-nav" onclick="bukaDokTerakhir()">
+  📂 Buka Dokumen Terakhir
+</button>
+
+<button type="button" class="btn btn-del" onclick="hapusData()">
+  Hapus Data
+</button>
+  </div>
+
+<div class="loading" id="loading" style="display:none">
+  ⏳ Membuat dokumen...
+</div>
+  `;
+}
+
+/* ================= BUKA DOK TERAKHIR ================= */
+function bukaDokTerakhir(){
+  if(lastDocUrl){
+    window.open(lastDocUrl,"_blank");
+  }else{
+    alert("Belum ada dokumen yang dibuat");
+  }
+}
+
+/* ================= FUNGSI LAIN TIDAK DIUBAH ================= */
+function nextData(){if(index<dataList.length-1){index++;render();}}
+function prevData(){if(index>0){index--;render();}}
+function setupSearch(){
+  const input = document.getElementById("search");
+  const box   = document.getElementById("suggestions");
+
+  function fuzzyMatch(text, pattern){
+    text = text.toLowerCase();
+    pattern = pattern.toLowerCase();
+
+    let ti = 0, pi = 0;
+    while(ti < text.length && pi < pattern.length){
+      if(text[ti] === pattern[pi]) pi++;
+      ti++;
+    }
+    return pi === pattern.length;
+  }
+
+  input.oninput = () => {
+    const q = input.value.trim();
+    box.innerHTML = "";
+    if(!q) return;
+
+    dataList
+      .filter(d => d.nama && fuzzyMatch(d.nama, q))
+      .slice(0,7)
+      .forEach(d => {
+        const div = document.createElement("div");
+        div.textContent = d.nama;
+        div.onclick = () => {
+          index = dataList.findIndex(x => x.id === d.id);
+          render();
+          box.innerHTML = "";
+          input.value = d.nama;
+        };
+        box.appendChild(div);
+      });
+  };
+}
+async function simpan(btn){
+  const d = dataList[index];
+  if(!d || !d.id){
+    alert("Data tidak valid");
+    return;
+  }
+
+  // ambil input kanan
+  const nomorSurat  = document.getElementById("nomor_surat").value.trim();
+  const tglMulai    = document.getElementById("tgl_mulai").value;
+  const lamaCuti    = parseInt(document.getElementById("lama_cuti").value || 0);
+  const cutiBersama = parseInt(document.getElementById("cb").value || 0);
+  const sisaCuti    = document.getElementById("sisa_cuti").value.trim();
+
+// ambil nilai status (INI YANG KURANG)
+const status = document.getElementById("status").value;
+
+// hitung ulang akhir cuti
+const akhirCuti = hitungAkhir(tglMulai, lamaCuti, cutiBersama);
+
+btn.disabled = true;
+btn.textContent = "Menyimpan...";
+
+const { error } = await supabaseClient
+  .from("pengajuan_cuti")
+  .update({
+    nomor_surat : nomorSurat,
+    tgl_mulai   : tglMulai,
+    lama_cuti   : lamaCuti,
+    cuti_bersama: cutiBersama,
+    sisa_cuti   : sisaCuti,
+    tgl_selesai : akhirCuti,
+    status      : status
+  })
+  .eq("id", d.id);
+
+btn.disabled = false;
+btn.textContent = "Simpan";
+
+  if(error){
+    showToast("❌ Gagal menyimpan data", "error");
+    return;
+  }
+
+  // update data lokal (ANTI HILANG SAAT REFRESH)
+  d.nomor_surat   = nomorSurat;
+  d.tgl_mulai     = tglMulai;
+  d.lama_cuti     = lamaCuti;
+  d.cuti_bersama  = cutiBersama;
+  d.sisa_cuti     = sisaCuti;
+  d.tgl_selesai   = akhirCuti;
+
+  render();
+  showToast("✅ Data berhasil disimpan");
+}
+  function showToast(msg, type="success"){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (type==="error" ? " error" : "");
+  setTimeout(()=>t.classList.remove("show"), 2500);
+}
+
+/* ================= TABEL KIRI (DATA PENGAJUAN) ================= */
+function renderTable(list){
+  const tbody = document.getElementById("tableBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  list.forEach(d => {
+    let statusClass = "status-diajukan";
+    if (d.status === "PROSES TTD") statusClass = "status-proses";
+    if (d.status && d.status.startsWith("SUDAH")) statusClass = "status-selesai";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${d.nama || ""}</td>
+      <td>
+        <span class="status-badge ${statusClass}">
+          ${d.status || "-"}
+        </span>
+      </td>
+    `;
+
+    tr.onclick = () => {
+      const idx = dataList.findIndex(x => x.id === d.id);
+      if (idx !== -1) {
+        index = idx;
+        render(); // tampilkan detail kanan
+      }
+    };
+
+    tbody.appendChild(tr);
+  });
+}
+/* ================= LOAD TABEL PENGAJUAN ================= */
+let tableData = [];
+/* ================= TABEL KANAN (FULL) ================= */
+function renderTableFull(list){
+  const tbody = document.getElementById("tableBodyFull");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  list.forEach((d, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${d.nama || ""}</td>
+      <td>${d.nip || ""}</td>
+      <td>${d.jenis_cuti || ""}</td>
+      <td>${d.tgl_mulai || ""}</td>
+      <td>${d.tgl_selesai || ""}</td>
+      <td>${d.lama_cuti || ""}</td>
+      <td>${d.nomor_surat || ""}</td>
+      <td>${d.sisa_cuti ?? ""}</td>
+      <td>${d.status || ""}</td>
+      <td>
+        ${d.Url_dokumen ? `<a href="${d.Url_dokumen}" target="_blank">📄</a>` : "-"}
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+async function loadTable(){
+  tableData = dataList;   // 🔥 pakai data yang sudah diload di loadAll()
+  renderTable(tableData);
+}
+/* ================= BUAT DOKUMEN (FINAL & STABIL) ================= */
+async function buatDokumen(v){
+
+  // 🔥 WAJIB ADA (AMBIL SETELAH render() MEMBUAT ELEMEN)
+  const loading = document.getElementById("loading");
+  const docLink = document.getElementById("docLink");
+
+  const d = dataList[index];
+  const akhir = d.tgl_selesai || hitungAkhir(
+    d.tgl_mulai,
+    d.lama_cuti,
+    d.cuti_bersama
+  );
+
+  if (loading) loading.style.display = "block";
+  if (docLink) docLink.innerHTML = "";
+
+  const p = new URLSearchParams({
+    versi: v,
+    NAMA: d.nama,
+    NIP: d.nip,
+    JABATAN: d.jabatan || "",
+    JENIS_CUTI: d.jenis_cuti,
+    LAMA_CUTI: d.lama_cuti,
+    AWAL_CUTI: d.tgl_mulai,
+    AKHIR_CUTI: akhir,
+    SISA_CUTI: d.sisa_cuti || "",
+    NOMOR_SURAT: d.nomor_surat || "",
+    ALAMAT: d.alamat || "",
+    HP: d.no_hp || "",
+    TTD: d.signature_url || ""
+  });
+
+  try {
+    const r = await fetch(GAS_URL + "?" + p.toString());
+    const j = await r.json();
+
+    if (j && j.url) {
+      lastDocUrl = j.url;
+      lastDocName = j.name || "Dokumen Cuti";
+
+      await supabaseClient
+        .from("pengajuan_cuti")
+        .update({
+          Url_dokumen: j.url,
+          tgl_selesai: akhir
+        })
+        .eq("id", d.id);
+
+      if (docLink) {
+        docLink.innerHTML =
+          `📄 <a href="${j.url}" target="_blank">${lastDocName}</a>`;
+      }
+
+      window.open(j.url, "_blank");
+    }
+  } catch (err) {
+    if (docLink) {
+      docLink.innerHTML =
+        "⚠️ Dokumen kemungkinan berhasil dibuat. Silakan cek Drive.";
+    }
+  } finally {
+    if (loading) loading.style.display = "none";
+  }
+}
+/* ================= START APP ================= */
+loadAll();
+function openTab(id, btn){
+  document.querySelectorAll(".tab-content")
+    .forEach(el => el.classList.remove("active"));
+
+  document.querySelectorAll(".tab-btn")
+    .forEach(el => el.classList.remove("active"));
+
+  document.getElementById(id).classList.add("active");
+  btn.classList.add("active");
+}
+</script>
+<div id="toast" class="toast"></div>
+</body>
+</html>
